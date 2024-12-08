@@ -55,18 +55,3 @@ Pentru această problemă, am utilizat următorii algoritmi de învățare autom
 ### Evaluarea Performanței:
 - Evaluarea modelelor folosind metrici precum RMSE (Root Mean Square Error), MAE (Mean Absolute Error).
 - Compararea performanței fiecărui model pentru a determina cea mai bună abordare.
-
-## Structura Fișierelor
-
-```plaintext
-.
-├── data/
-│   └── date_istorice.xlsx   # Fișierul cu date istorice
-├── src/
-│   ├── preprocesare.py      # Cod pentru preprocesarea datelor
-│   ├── id3_regresie.py      # Implementarea algoritmului ID3 adaptat pentru regresie
-│   ├── bayes_regresie.py    # Implementarea clasificării bayesiene adaptate
-│   ├── evaluare.py          # Evaluarea performanței modelelor
-├── README.md                # Acest fișier
-├── raport.pdf               # Raportul final în format PDF
-├── requirements.txt         # Dependențele necesare pentru rularea proiectului
