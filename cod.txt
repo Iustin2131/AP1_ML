@@ -1,0 +1,158 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{AP1}
+\author{Iustin Țigănescu}
+\date{Decembrie 2024}
+
+\begin{document}
+
+\maketitle
+
+\section{Descrierea problemei}
+
+\subsection{Contextul}
+Proiectul solicită dezvoltarea unui model de predicție pentru soldul total al Sistemului Energetic Național (SEN) al României, pentru luna decembrie 2024. Soldul este calculat ca diferența dintre producția totală și consumul total de energie electrică. Datele necesare pentru această analiză provin din seturi istorice, care descriu consumul și producția de energie electrică defalcate pe surse precum hidro, eolian, nuclear, cărbune și altele. 
+Soluția trebuie să fie bazată pe algoritmii de învățare automată \textbf{ID3 (arbore de decizie)} și \textbf{clasificare bayesiană}, adaptați pentru o problemă de regresie. În plus, proiectul impune limitări, cum ar fi excluderea datelor din decembrie pentru antrenarea modelelelor.
+
+\subsection{Scopul proiectului}
+Proiectul are drept scop dezvoltarea unei soluții predictive capabile să estimeze cu acuratețe soldul total al SEN pentru luna decembrie 2024. Principalele obiective sunt:
+
+\subsubsection{Analiza Datelor}
+\begin{itemize}
+    \item Înțelegerea variabilelor furnizate în setul de date (producție, consum, sold) și relațiile dintre ele.
+    \item Preprocesarea datelor pentru eliminarea zgomotului și pregătirea unui set adecvat de antrenament.
+\end{itemize}
+
+\subsubsection{Adaptarea Algoritmilor}
+\begin{itemize}
+    \item \textbf{ID3 (Arbore de Decizie):} Transformarea algoritmului pentru a suporta probleme de regresie prin discretizarea intervalelor de valori ale soldului (\textit{bucketing}).
+    \item \textbf{Clasificare Bayesiană:} Discretizarea variabilelor continue și calcularea probabilităților condiționate.
+\end{itemize}
+
+\subsubsection{Evaluarea Performanței}
+\begin{itemize}
+    \item Pentru evaluarea performanței modelului de regresie, a fost utilizată metrica \textbf{Mean Squared Error (MSE)}. Aceasta calculează eroarea pătratică medie între valorile prezise și valorile reale. Modelul a fost folosit pentru a prezice valorile soldului pentru fiecare zi din luna decembrie 2024, iar rezultatele au fost evaluate folosind funcția \texttt{mean\_squared\_error}, implementată în scriptul \texttt{prezic\_decembrie\_2024.py}.
+\end{itemize}
+
+\section{Justificarea abordării}
+
+\subsection{ID3 vs Clasificare Bayesiană}
+Am ales algoritmul ID3 și clasificarea bayesiană deoarece ambele metode sunt bine adaptate pentru a face predicții în probleme de regresie pe baza datelor istorice. ID3, prin utilizarea arborilor de decizie, permite o interpretare clară și transparentă a procesului de decizie, fiind eficient în identificarea relațiilor între variabilele de intrare. Clasificarea bayesiană, pe de altă parte, oferă un cadru probabilistic robust, care poate gestiona incertitudinile și variabilitatea datelor, fiind potrivită pentru estimarea valorilor continue.
+
+\subsection{Logica Programului}
+Logica completă a programului implică trei etape principale: prelucrarea datelor, antrenarea modelelor și generarea predicțiilor. Inițial, datele brute energetice sunt procesate și agregate zilnic pentru a standardiza intrările (scriptul \texttt{procesare\_csv}). Apoi, două modele sunt antrenate: un model de clasificare bazat pe arborele de decizie (ID3) pentru a categoriza \texttt{Sold[MW]} în clase distincte (Foarte mic, Mic etc.), utilizând entropia și câștigul informațional, și un model regresiv pentru a prezice numeric \texttt{Sold[MW]}. Ambele modele sunt antrenate pe date istorice, excluzând luna decembrie, pentru a asigura corectitudinea. În final, folosind medii zilnice calculate pentru decembrie 2024, programul generează predicții clasificate și numerice, salvându-le într-un fișier Excel.
+
+\subsubsection{Concat.py}
+Acest script prelucrează un fișier Excel ce conține datele energetice, agregându-le la nivel zilnic și salvându-le într-un nou fișier Excel. Mai exact, scriptul încarcă fișierul de intrare (\texttt{Grafic\_SEN.xlsx}), convertește coloanele de date relevante în format numeric, setând coloana \texttt{Data} ca index pentru a permite agregarea pe zile. Ulterior, datele sunt agregate zilnic (adică suma pentru consumul și producția de energie pe fiecare zi, și media pentru consumul mediu). După prelucrare, datele sunt salvate într-un fișier Excel nou (\texttt{date\_sen\_agregat.xlsx}) cu un format mai ușor de citit pentru data calendaristică. În caz de eroare (ex. fișierul nu poate fi citit sau coloanele nu pot fi convertite), scriptul capturează și afișează mesajul de eroare.
+
+\subsubsection{Prezic\_decembrie\_2024.py}
+Acest script prelucrează și face predicții pentru consumul de energie electrică din luna decembrie 2024 folosind un model de regresie bazat pe un arbore de decizie. În primul rând, încarcă și filtrează datele dintr-un fișier Excel (\texttt{date\_sen\_agregat.xlsx}) pentru luna decembrie. Apoi, definește variabilele de intrare și țintă, convertind datele în format numeric și completând valorile lipsă cu 0. Scriptul împarte datele în seturi de antrenament și test, antrenează modelul de regresie folosind arborele de decizie și evaluează performanța acestuia prin calculul erorii pătratice medii (MSE). După antrenament, pentru fiecare zi din decembrie 2024, scriptul calculează media valorilor corespunzătoare fiecărei zile din datele de decembrie existente și face predicții pentru Sold[MW]. Predicțiile sunt apoi salvate într-un fișier Excel (\texttt{decembrie\_2024.xlsx}).
+
+\subsubsection{Id3.py}
+Acest script încarcă și prelucrează datele de energie dintr-un fișier Excel (\texttt{date\_sen\_agregat.xlsx}) pentru a antrena un model de învățare automată, utilizând un arbore de decizie. Modelul prezice categoriile de sold (Sold[MW]) pe baza altor caracteristici de consum și producție de energie. Înainte de antrenare, datele sunt preprocesate: se convertește coloana de date într-un tip corect, se creează o variabilă categorică pentru sold și se curăță valorile lipsă. Apoi, datele sunt împărțite în seturi de antrenament și testare, modelul este antrenat, iar acuratețea sa este evaluată. După antrenare, arborele de decizie este salvat într-un fișier PNG. Dacă există date pentru decembrie 2024 într-un alt fișier Excel (\texttt{decembrie\_2024.xlsx}), modelul face predicții pentru această lună. Rezultatele predicțiilor sunt afișate pentru fiecare zi din decembrie 2024.
+
+\section{Prezentarea rezultatelor}
+
+\subsection{Observația 1}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{imagine1.png}
+    \caption{Date energetice - Decembrie 2022}
+    \label{fig:decembrie2022}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{imagine2.png}
+    \caption{Date energetice - Ianuarie 2023}
+    \label{fig:ianuarie2023}
+\end{figure}
+
+Analizând datele energetice pentru ultimele două luni incluse în imagini (\textit{Decembrie 2022} și \textit{Ianuarie 2023}), putem observa următoarele schimbări:
+
+\begin{itemize}
+    \item Producția din surse regenerabile, precum \textbf{eoliană} și \textbf{fotovoltaică}, a crescut constant, reflectând o tendință spre adoptarea energiilor verzi.
+    \item Consumul mediu zilnic de energie electrică a scăzut ușor, indicând o posibilă reducere a cererii în această perioadă.
+    \item Sursele tradiționale precum \textbf{cărbunele} și \textbf{hidrocarburile} au înregistrat o ușoară scădere a producției, ceea ce poate fi corelat cu tranziția către surse mai curate de energie.
+    \item Contribuția hidrocentralelor a fost relativ constantă, însă în anumite zile a scăzut semnificativ comparativ cu perioadele anterioare.
+    \item Soldul (\textit{Sold[MW]}), calculat ca diferența dintre producție și consum, indică valori negative mai frecvent în luna decembrie 2022, ceea ce sugerează un deficit mai mare de energie produsă raportat la consum.
+\end{itemize}
+
+\textbf{Concluzie generală:} Datele reflectă o tranziție treptată către surse regenerabile, dar și necesitatea unui echilibru mai bun între producție și consum, în special pentru a reduce dependența de sursele tradiționale, care au înregistrat scăderi. Aceste tendințe subliniază nevoia continuării investițiilor în infrastructura energetică modernă și sustenabilă.
+
+\subsection{Observația 2}
+
+\begin{verbatim}
+sold_categoric = []
+for sold in data['Sold[MW]']:
+    if pd.isna(sold):
+        sold_categoric.append(np.nan)
+    elif sold < -500:
+        sold_categoric.append('Foarte mic')
+    elif -500 <= sold < 0:
+        sold_categoric.append('Mic')
+    elif 0 <= sold < 500:
+        sold_categoric.append('Mediu')
+    elif 500 <= sold < 1000:
+        sold_categoric.append('Mare')
+    else:
+        sold_categoric.append('Foarte mare')
+\end{verbatim}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{imagine3.png}
+    \caption{Predicții Sold[MW] - Decembrie 2024 (Clasificare)}
+    \label{fig:predictii2024_clasificare}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{imagine4.png}
+    \caption{Cod logic utilizat pentru clasificarea Sold[MW]}
+    \label{fig:cod_logica_sold}
+\end{figure}
+
+Datele și predicțiile pentru luna decembrie 2024 evidențiază câteva aspecte importante:
+
+\begin{itemize}
+    \item \textbf{Deficite energetice persistente:} Majoritatea zilelor din decembrie sunt clasificate ca "Foarte mic", confirmând un sold energetic negativ accentuat, în linie cu mediile istorice (de exemplu, zilele 1, 2, 23-26).
+    \item \textbf{Excepții pozitive:} Zilele 12 și 13 au predicții "Foarte mare", indicând un potențial excedent energetic. Aceasta reflectă o continuitate cu mediile istorice pozitive din aceleași zile.
+    \item \textbf{Echilibru rar:} Ziua 11 este singura clasificată ca "Mediu", indicând o îmbunătățire temporară față de alte zile din lună.
+    \item \textbf{Anomalii față de istoric:} Zilele precum 6, deși cu medii istorice pozitive modeste, sunt prezise ca "Foarte mic", sugerând factori noi care afectează balanța energetică.
+\end{itemize}
+
+\textbf{Concluzie generală:} Predicțiile din decembrie 2024 confirmă o presiune asupra sistemului energetic, cu deficite frecvente. Creșterea echilibrului energetic în anumite zile poate reflecta schimbări punctuale în producție sau consum, dar este nevoie de o analiză mai detaliată pentru a identifica cauzele anomaliilor și pentru a sprijini o tranziție mai echilibrată energetic.
+
+\section{Concluzii}
+
+Prin realizarea acestui proiect, am învățat cum să abordăm o problemă complexă de predicție a soldului total al Sistemului Energetic Național (SEN), utilizând algoritmi de învățare automată. După analiza datelor istorice și aplicarea tehnicilor de preprocesare (cum ar fi discretizarea valorilor continue și gestionarea valorilor lipsă), am obținut un model care poate prezice soldul SEN cu un anumit grad de acuratețe.
+
+Printre lecțiile învățate se numără:
+\begin{itemize}
+    \item Importanța preprocesării datelor și a curățării acestora înainte de antrenarea modelului. Eliminarea valorilor aberante și gestionarea valorilor lipsă sunt pași esențiali pentru a obține rezultate precise.
+    \item Transformarea unei probleme de regresie într-o problemă de clasificare (prin discretizarea soldului) poate fi eficientă în anumite contexte, dar poate duce și la pierderea unor informații fine din date.
+    \item Performanța modelului poate fi influențată de alegerea intervalelor de discretizare și de parametrii algoritmilor utilizați, astfel încât o alegere atentă a acestora este esențială pentru îmbunătățirea acurateței predicției.
+\end{itemize}
+
+În ceea ce privește îmbunătățirea metodei, există mai multe direcții care ar putea fi explorate:
+\begin{itemize}
+    \item \textbf{Optimizarea intervalelor de discretizare:} În loc de o discretizare manuală simplă, utilizarea unor metode de învățare automată pentru a găsi cele mai bune intervale ar putea îmbunătăți semnificativ precizia modelului.
+    \item \textbf{Încorporarea altor variabile explicative:} Dacă ar fi disponibile date suplimentare (cum ar fi prognoza meteo, fluctuațiile pieței de energie, etc.), includerea acestora în model ar putea aduce îmbunătățiri semnificative în predicții.
+    \item \textbf{Îmbunătățirea algoritmilor de învățare automată:} Testarea altor algoritmi, cum ar fi regresia liniară, random forests sau rețele neuronale, ar putea oferi rezultate mai precise, comparativ cu cele obținute prin ID3 și clasificarea bayesiană.
+    \item \textbf{Adoptarea unui model de regresie continuă:} O abordare bazată pe regresie continuă, fără discretizarea soldului, ar putea permite obținerea unor predicții mai exacte, prin păstrarea informațiilor fine din datele de intrare.
+     \item \textbf{Utilizarea clasificării bayesiene} în locul valorilor medii istorice pentru predicția soldului total poate aduce îmbunătățiri semnificative. În loc să te bazezi pe o simplă medie a valorilor anterioare, clasificarea bayesiană permite modelarea incertitudinii și a relațiilor condiționale dintre variabilele de intrare (precum producția și consumul de energie) și rezultatul dorit (soldul). Aceasta poate învăța distribuțiile de probabilitate ale variabilelor și poate furniza predicții mai robuste și mai precise, având în vedere fluctuațiile și sezonalitatea datelor. 
+\end{itemize}
+
+Acuratețea unui model este raportul dintre predicțiile corecte și cele totale. În cazul \texttt{DecisionTreeClassifier}, acuratețea se calculează folosind funcția \texttt{accuracy\_score} din \texttt{sklearn.metrics}, care compară etichetele prezise cu cele reale. Procesul include antrenarea modelului pe setul de date de antrenament, realizarea predicțiilor pe setul de test și apoi calcularea acurateței ca procentaj din predicțiile corecte. De exemplu, o acuratețe de 0.88 înseamnă că 88\% din predicțiile modelului sunt corecte.
+
+Prin implementarea acestor îmbunătățiri, precizia predicțiilor ar putea fi crescută, iar gestionarea dezechilibrelor din SEN ar putea deveni mai eficientă.
+
+\end{document}
