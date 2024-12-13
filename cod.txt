@@ -106,6 +106,15 @@ for sold in data['Sold[MW]']:
         sold_categoric.append('Foarte mare')
 \end{verbatim}
 
+Datele și predicțiile pentru luna decembrie 2024 evidențiază câteva aspecte importante:
+
+\begin{itemize}
+    \item \textbf{Deficite energetice persistente:} Majoritatea zilelor din decembrie sunt clasificate ca "Foarte mic", confirmând un sold energetic negativ accentuat, în linie cu mediile istorice (de exemplu, zilele 1, 2, 23-26).
+    \item \textbf{Excepții pozitive:} Zilele 12 și 13 au predicții "Foarte mare", indicând un potențial excedent energetic. Aceasta reflectă o continuitate cu mediile istorice pozitive din aceleași zile.
+    \item \textbf{Echilibru rar:} Ziua 11 este singura clasificată ca "Mediu", indicând o îmbunătățire temporară față de alte zile din lună.
+    \item \textbf{Anomalii față de istoric:} Zilele precum 6, deși cu medii istorice pozitive modeste, sunt prezise ca "Foarte mic", sugerând factori noi care afectează balanța energetică.
+\end{itemize}
+
 \begin{figure}
     \centering
     \includegraphics[width=0.8\textwidth]{imagine3.png}
@@ -120,16 +129,20 @@ for sold in data['Sold[MW]']:
     \label{fig:cod_logica_sold}
 \end{figure}
 
-Datele și predicțiile pentru luna decembrie 2024 evidențiază câteva aspecte importante:
+\subsection{Observația 3}
 
-\begin{itemize}
-    \item \textbf{Deficite energetice persistente:} Majoritatea zilelor din decembrie sunt clasificate ca "Foarte mic", confirmând un sold energetic negativ accentuat, în linie cu mediile istorice (de exemplu, zilele 1, 2, 23-26).
-    \item \textbf{Excepții pozitive:} Zilele 12 și 13 au predicții "Foarte mare", indicând un potențial excedent energetic. Aceasta reflectă o continuitate cu mediile istorice pozitive din aceleași zile.
-    \item \textbf{Echilibru rar:} Ziua 11 este singura clasificată ca "Mediu", indicând o îmbunătățire temporară față de alte zile din lună.
-    \item \textbf{Anomalii față de istoric:} Zilele precum 6, deși cu medii istorice pozitive modeste, sunt prezise ca "Foarte mic", sugerând factori noi care afectează balanța energetică.
-\end{itemize}
+Codul din fișierul \texttt{id3.py} implementează un clasificator de tip arbore de decizie folosind algoritmul ID3, pentru a prezice date energetice. Mai întâi, sunt încărcate date istorice dintr-un fișier Excel, iar apoi sunt excluse datele din luna decembrie pentru a antrena modelul. După ce datele sunt preprocesate și împărțite în seturi de antrenament și test, arborele de decizie este antrenat și evaluat. Modelul antrenat este folosit pentru a face predicții pentru decembrie 2024.
+
+În final, arborele de decizie este vizualizat și salvat ca imagine PNG. Aceasta conține noduri care reprezintă deciziile bazate pe caracteristici, muchii care indică rezultatele deciziilor și noduri finale care prezintă clasificările. Codul exportă arborele de decizie într-un fișier DOT, îl convertește într-un grafic și salvează imaginea, ajutând la înțelegerea procesului decizional al modelului.
 
 \textbf{Concluzie generală:} Predicțiile din decembrie 2024 confirmă o presiune asupra sistemului energetic, cu deficite frecvente. Creșterea echilibrului energetic în anumite zile poate reflecta schimbări punctuale în producție sau consum, dar este nevoie de o analiză mai detaliată pentru a identifica cauzele anomaliilor și pentru a sprijini o tranziție mai echilibrată energetic.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{imagine5.png}
+    \caption{Cod logic utilizat pentru clasificarea Sold[MW]}
+    \label{fig:cod_logica_sold}
+\end{figure}
 
 \section{Concluzii}
 
